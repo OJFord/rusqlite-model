@@ -1,0 +1,12 @@
+[package]
+name = "rusqlite-model-derive"
+version = "0.1.0"
+edition = "2018"
+
+[dependencies]
+quote = "1.0"
+syn = { version = "1.0", features = [ "extra-traits", "parsing" ] }
+
+[lib]
+path = "lib.rs"
+proc-macro = true

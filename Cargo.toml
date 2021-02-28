@@ -1,11 +1,5 @@
-[package]
-name = "model_derive"
-version = "0.0.0"
-edition = "2018"
-
-[dependencies]
-quote = "1.0"
-syn = { version = "1.0", features = [ "extra-traits", "parsing" ] }
-
-[lib]
-proc-macro = true
+[workspace]
+members = [
+  "rusqlite-model",
+  "rusqlite-model-derive",
+]

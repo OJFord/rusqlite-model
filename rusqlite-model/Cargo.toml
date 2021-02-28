@@ -1,0 +1,11 @@
+[package]
+name = "rusqlite-model"
+version = "0.1.0"
+edition = "2018"
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+rusqlite = "0.24"
+rusqlite-model-derive = { version = "0.1", path = "../rusqlite-model-derive" }
