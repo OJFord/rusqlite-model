@@ -59,43 +59,46 @@ fn impl_model(name: &syn::Ident, fields: &Vec<&syn::Field>) -> TokenStream {
     });
 
     let gen = quote! {
-      impl Model<'_> for #name {
+        impl Model<'_> for #name {
 
-        fn create_table(conn: &rusqlite::Connection) -> rusqlite::Result<usize> {
-          conn.execute(std::stringify!(
-              CREATE TABLE #table_name (
-                #(#field_names #sql_types),*
-              )
-            ),
-            rusqlite::NO_PARAMS,
-          )
+            fn create_table(conn: &rusqlite::Connection) -> rusqlite::Result<usize> {
+                conn.execute(
+                    std::stringify!(
+                        CREATE TABLE #table_name (
+                            #(#field_names #sql_types),*
+                        )
+                    ),
+                    rusqlite::NO_PARAMS,
+                )
+            }
+
+            fn drop_table(conn: &rusqlite::Connection) -> rusqlite::Result<usize> {
+            conn.execute(std::stringify!(
+                    DROP TABLE IF EXISTS #table_name
+                ),
+                rusqlite::NO_PARAMS,
+            )
+            }
+
+            fn insert(self, conn: &rusqlite::Connection) -> rusqlite::Result<usize> {
+                let mut stmt = conn
+                    .prepare(std::stringify!(
+                        INSERT INTO #table_name (#(#field_names),*) VALUES (#(#param_holders),*)
+                    ))
+                    .unwrap();
+
+                println!("{:?}", stmt);
+                stmt.execute(self.into_params())
+            }
+
+            fn into_params(self) -> std::vec::IntoIter<Box<dyn rusqlite::ToSql>> {
+                let ret: Vec<Box<dyn rusqlite::ToSql>> = vec![
+                    #(Box::new(self.#field_names),)*
+                ];
+                ret.into_iter()
+            }
+
         }
-
-        fn drop_table(conn: &rusqlite::Connection) -> rusqlite::Result<usize> {
-          conn.execute(std::stringify!(
-              DROP TABLE IF EXISTS #table_name
-            ),
-            rusqlite::NO_PARAMS,
-          )
-        }
-
-        fn insert(self, conn: &rusqlite::Connection) -> rusqlite::Result<usize> {
-          let mut stmt = conn
-            .prepare(std::stringify!(INSERT INTO #table_name (#(#field_names),*) VALUES (#(#param_holders),*)))
-            .unwrap();
-
-          println!("{:?}", stmt);
-          stmt.execute(self.into_params())
-        }
-
-        fn into_params(self) -> std::vec::IntoIter<Box<dyn rusqlite::ToSql>> {
-          let ret: Vec<Box<dyn rusqlite::ToSql>> = vec![
-            #(Box::new(self.#field_names),)*
-          ];
-          ret.into_iter()
-        }
-
-      }
     };
 
     gen.into()
@@ -107,15 +110,15 @@ fn impl_tryfrom(fields: &Vec<&syn::Field>) -> TokenStream {
         .map(|f| f.ident.as_ref().expect("expected named field"));
 
     let gen = quote! {
-      impl<'a> std::convert::TryFrom<&'a rusqlite::Row<'a>> for Transaction {
-        type Error = rusqlite::Error;
+        impl<'a> std::convert::TryFrom<&'a rusqlite::Row<'a>> for Transaction {
+            type Error = rusqlite::Error;
 
-        fn try_from(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
-          Ok(Self {
-            #(#field_names: row.get(row.column_index(std::stringify!(#field_names))?)?,)*
-          })
+            fn try_from(row: &rusqlite::Row<'_>) -> rusqlite::Result<Self> {
+                Ok(Self {
+                    #(#field_names: row.get(row.column_index(std::stringify!(#field_names))?)?,)*
+                })
+            }
         }
-      }
     };
 
     gen.into()
