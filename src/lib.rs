@@ -2,6 +2,7 @@ use proc_macro::TokenStream;
 use quote::quote;
 use syn::parse_macro_input;
 use syn::DeriveInput;
+use syn::Ident;
 
 #[proc_macro_derive(Model)]
 pub fn derive_model(input: TokenStream) -> TokenStream {
@@ -29,15 +30,30 @@ pub fn derive_model(input: TokenStream) -> TokenStream {
     ts
 }
 
-fn impl_model(name: &syn::Ident, fields: &Vec<&syn::Ident>) -> TokenStream {
+fn impl_model(name: &Ident, fields: &Vec<&Ident>) -> TokenStream {
+    let param_holders = vec![quote!(?); fields.len()];
+    let mut table_name = format!("{}s", name);
+    table_name.make_ascii_lowercase();
+
     let gen = quote! {
       impl Model<'_> for #name {
+
+        fn insert(self, conn: &rusqlite::Connection) -> rusqlite::Result<usize> {
+          let mut stmt = conn
+            .prepare(std::stringify!(INSERT INTO #table_name (#(#fields),*) VALUES (#(#param_holders),*)))
+            .unwrap();
+
+          println!("{:?}", stmt);
+          stmt.execute(self.into_params())
+        }
+
         fn into_params(self) -> std::vec::IntoIter<Box<dyn rusqlite::ToSql>> {
           let ret: Vec<Box<dyn rusqlite::ToSql>> = vec![
             #(Box::new(self.#fields),)*
           ];
           ret.into_iter()
         }
+
       }
     };
 
