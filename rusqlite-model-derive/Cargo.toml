@@ -1,5 +1,9 @@
 [package]
 name = "rusqlite-model-derive"
+description = "Derive implementation for `rusqlite_model::Model`"
+license = "MIT"
+authors = ["OJFord"]
+repository = "https://github.com/OJFord/rusqlite-model"
 version = "0.1.0"
 edition = "2018"
 

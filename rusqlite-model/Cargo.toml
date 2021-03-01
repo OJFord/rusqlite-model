@@ -1,5 +1,9 @@
 [package]
 name = "rusqlite-model"
+description = "Model trait for structs into or from `rusqlite` SQLite connections"
+license = "MIT"
+authors = ["OJFord"]
+repository = "https://github.com/OJFord/rusqlite-model"
 version = "0.1.0"
 edition = "2018"
 

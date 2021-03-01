@@ -1,5 +1,7 @@
 # rusqlite-model
 
+[![Crates.io](https://img.shields.io/crates/v/rusqlite-model?style=flat-square)](//crates.io/crates/rusqlite-model) [![docs.rs](https://img.shields.io/docsrs/rusqlite-model?style=flat-square)](//docs.rs/rusqlite-model)
+
 For when serialising/deserialising a struct into/from your ([rusqlite](//github.com/rusqlite/rusqlite)) database queries would be convenient, but you don't need all of [diesel](//diesel.rs).
 
 ## Usage
